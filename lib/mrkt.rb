@@ -10,6 +10,8 @@ require 'mrkt/concerns/crud_lists'
 require 'mrkt/concerns/import_leads'
 require 'mrkt/concerns/crud_custom_objects'
 require 'mrkt/concerns/crud_programs'
+require 'mrkt/concerns/crud_activities'
+require 'mrkt/concerns/crud_opportunities'
 
 module Mrkt
   class Client

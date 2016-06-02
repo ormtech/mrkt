@@ -1,5 +1,9 @@
 module Mrkt
   module CrudLeads
+    def describe_leads
+      get("/rest/v1/leads/describe.json")
+    end
+
     def get_leads(filter_type, filter_values, fields: nil, batch_size: nil, next_page_token: nil)
       params = {
         filterType: filter_type,

@@ -1,5 +1,13 @@
 module Mrkt
   module CrudLists
+    def browse_lists(batch_size: nil, next_page_token: nil)
+      params = {}
+      params[:batchSize] = batch_size if batch_size
+      params[:nextPageToken] = next_page_token if next_page_token
+
+      get("/rest/v1/lists.json", params)
+    end
+
     def get_leads_by_list(list_id, fields: nil, batch_size: nil, next_page_token: nil)
       params = {}
       params[:fields] = fields if fields
