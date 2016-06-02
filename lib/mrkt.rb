@@ -22,6 +22,8 @@ module Mrkt
     include ImportLeads
     include CrudCustomObjects
     include CrudPrograms
+    include CrudActivities
+    include CrudOpportunities
 
     attr_accessor :debug
 
