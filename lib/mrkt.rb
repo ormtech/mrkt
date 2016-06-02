@@ -32,6 +32,7 @@ module Mrkt
 
       @client_id = options.fetch(:client_id)
       @client_secret = options.fetch(:client_secret)
+      @max_retries = options.fetch(:max_retries, 10)
 
       @options = options
     end
@@ -40,9 +41,20 @@ module Mrkt
       define_method(http_method) do |path, payload = {}, &block|
         authenticate!
 
-        resp = connection.send(http_method, path, payload) do |req|
-          add_authorization(req)
-          block.call(req) unless block.nil?
+        retries = 0
+        begin
+          resp = connection.send(http_method, path, payload) do |req|
+            add_authorization(req)
+            block.call(req) unless block.nil?
+          end
+        rescue Mrkt::Errors::AccessTokenExpired
+          if retries >= @max_retries
+            authenticate!
+            retries += 1
+            retry
+          else
+            fail Mrkt::Errors::Error.new("Tried reauthentication #{max_retries} times")
+          end
         end
 
         resp.body
