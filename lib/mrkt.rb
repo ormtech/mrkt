@@ -50,7 +50,7 @@ module Mrkt
             block.call(req) unless block.nil?
           end
         rescue Mrkt::Errors::AccessTokenExpired
-          if retries >= @max_retries
+          if retries < @max_retries
             authenticate!
             retries += 1
             retry
