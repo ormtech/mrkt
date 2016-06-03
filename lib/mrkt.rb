@@ -12,6 +12,8 @@ require 'mrkt/concerns/crud_custom_objects'
 require 'mrkt/concerns/crud_programs'
 require 'mrkt/concerns/crud_activities'
 require 'mrkt/concerns/crud_opportunities'
+require 'mrkt/concerns/paging_tokens'
+require 'mrkt/concerns/usage'
 
 module Mrkt
   class Client
@@ -26,6 +28,8 @@ module Mrkt
     include CrudPrograms
     include CrudActivities
     include CrudOpportunities
+    include PagingToken
+    include Usage
 
     attr_accessor :debug
 
