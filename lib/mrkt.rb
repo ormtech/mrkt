@@ -45,17 +45,16 @@ module Mrkt
 
     %i(get post delete).each do |http_method|
       define_method(http_method) do |path, payload = {}, &block|
-        authenticate!
 
         retries = 0
         begin
+          authenticate!
           resp = connection.send(http_method, path, payload) do |req|
             add_authorization(req)
             block.call(req) unless block.nil?
           end
-        rescue Mrkt::Errors::AccessTokenExpired
+        rescue Mrkt::Errors::AccessTokenExpired, Mrkt::Errors::AuthorizationError
           if retries < @max_retries
-            authenticate!
             retries += 1
             retry
           else
