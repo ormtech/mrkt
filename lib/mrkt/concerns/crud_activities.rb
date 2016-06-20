@@ -20,14 +20,16 @@ module Mrkt
 
       params[:batchSize] = batch_size if batch_size
 
-      l_ids = if lead_ids.is_a? Array
-              lead_ids.join(",")
-            elsif lead_ids.is_a? String
-              lead_ids 
-            else
-              raise ArgumentError.new("String or Array expected for Lead IDs")
-            end
-      params[:leadIds] = l_ids if lead_ids
+      if lead_ids
+        l_ids = if lead_ids.is_a? Array
+                  lead_ids.join(",")
+                elsif lead_ids.is_a? String
+                  lead_ids
+                else
+                  raise ArgumentError.new("String or Array expected for Lead IDs")
+                end
+        params[:leadIds] = l_ids
+      end
 
       get("/rest/v1/activities.json", params)
     end
