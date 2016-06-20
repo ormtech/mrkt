@@ -4,7 +4,7 @@ module Mrkt
       get("rest/v1/activities/types.json")
     end
 
-    def get_activities(activity_type_ids, list_id: nil, next_page_token: nil, batch_size: nil)
+    def get_activities(activity_type_ids, list_id: nil, next_page_token: nil, batch_size: nil, lead_ids: nil)
       params = {}
       ids = if activity_type_ids.is_a? Array
               activity_type_ids.join(",")
@@ -19,6 +19,15 @@ module Mrkt
       params[:listId] = list_id if list_id
 
       params[:batchSize] = batch_size if batch_size
+
+      l_ids = if lead_ids.is_a? Array
+              lead_ids.join(",")
+            elsif lead_ids.is_a? String
+              lead_ids 
+            else
+              raise ArgumentError.new("String or Array expected for Lead IDs")
+            end
+      params[:leadIds] = l_ids if lead_ids
 
       get("/rest/v1/activities.json", params)
     end
