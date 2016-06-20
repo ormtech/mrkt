@@ -27,6 +27,15 @@ module Mrkt
       get('/rest/v1/activities/leadchanges.json', params)
     end
 
+    def get_leads_by_program(program_id, batch_size: nil, next_page_token: nil, fields: nil)
+      params = {}
+      params[:fields] = fields if fields
+      params[:batchSize] = batch_size if batch_size
+      params[:nextPageToken] = next_page_token if next_page_token
+
+      get("/rest/v1/leads/program/#{program_id}.json", params)
+    end
+
     def createupdate_leads(leads, action: 'createOrUpdate', lookup_field: nil, partition_name: nil, async_processing: nil)
       post('/rest/v1/leads.json') do |req|
         params = {
