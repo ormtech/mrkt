@@ -58,7 +58,7 @@ module Mrkt
             retries += 1
             retry
           else
-            fail Mrkt::Errors::Error.new("Tried reauthentication #{max_retries} times")
+            fail Mrkt::Errors::Error.new("Tried reauthentication #{@max_retries} times")
           end
         end
 
