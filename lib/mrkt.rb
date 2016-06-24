@@ -56,6 +56,7 @@ module Mrkt
         rescue Mrkt::Errors::AccessTokenExpired, Mrkt::Errors::AuthorizationError
           if retries < @max_retries
             retries += 1
+            sleep(3)
             retry
           else
             fail Mrkt::Errors::Error.new("Tried reauthentication #{@max_retries} times")
