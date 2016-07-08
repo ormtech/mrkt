@@ -49,7 +49,6 @@ If you need verbosity during troubleshooting, set the client to debug mode
 ```ruby
 client.debug = true
 ```
-
 ### Get leads matching an email, print their id and email
     
 ```ruby
@@ -82,6 +81,43 @@ tokens      = [{        # these tokens (optional) are then passed to the campaig
 client.request_campaign(campaign_id, lead_ids, tokens) # tokens can be omited
 => { requestId: 'e42b#14272d07d78', success: true }
 ```
+
+## Connection Customization
+
+The underlying Faraday connection can be completely customized
+
+```ruby
+connection = Faraday.new(url: 'https://123-abc-123.mktorest.com') do |conn|
+  conn.request :multipart                       # required
+  conn.request :url_encoded                     # required
+
+  # Add request middleware to retry failed requests
+  conn.request(:retry,
+    max:                 10,
+    interval:            0.05,
+    interval_randomness: 0.5,
+    backoff_factor:      2,
+    exceptions: [
+      Errno::ETIMEDOUT,
+      'Timeout::Error',
+      ::Faraday::Error::TimeoutError,
+      ::Faraday::ConnectionFailed
+    ]
+  )
+
+  conn.response :logger, Rails.logger           # Add a custom logger
+  conn.response :mkto, content_type: /\bjson$/  # required
+
+  conn.adapter Faraday.default_adapter
+end
+
+client = Mrkt::Client.new(
+  connection:    connection,
+  host:          '123-abc-123.mktorest.com',
+  client_id:     '4567e1cdf-0fae-4685-a914-5be45043f2d8',
+  client_secret: '7Gn0tuiHZiDHnzeu9P14uDQcSx9xIPPt')
+```
+
 
 ## Run Tests
 
