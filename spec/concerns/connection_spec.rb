@@ -2,7 +2,7 @@ describe Mrkt::Client do
   include_context 'initialized client'
 
   it "uses an existing Faraday connection when provided" do
-    logger_double = instance_double("Rails::Logger", debug: "Debugging", info: "Info")
+    logger_double = instance_double("::Logger", debug: "Debugging", info: "Info")
 
     conn = Faraday.new do |builder|
       builder.response :logger, logger_double
