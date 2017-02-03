@@ -4,6 +4,13 @@ module Mrkt
       get("rest/v1/activities/types.json")
     end
 
+    def get_deleted_leads(next_page_token: nil)
+      params = {}
+      params[:nextPageToken] = next_page_token
+
+      get("rest/v1/activities/deletedleads.json", params)
+    end
+
     def get_activities(activity_type_ids, list_id: nil, next_page_token: nil, batch_size: nil, lead_ids: nil)
       params = {}
       ids = if activity_type_ids.is_a? Array
