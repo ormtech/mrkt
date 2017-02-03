@@ -4,9 +4,11 @@ module Mrkt
       get("rest/v1/activities/types.json")
     end
 
-    def get_deleted_leads(next_page_token: nil)
+    def get_deleted_leads(next_page_token:, batch_size: nil)
       params = {}
+
       params[:nextPageToken] = next_page_token
+      params[:batchSize]     = batch_size if batch_size
 
       get("rest/v1/activities/deletedleads.json", params)
     end
