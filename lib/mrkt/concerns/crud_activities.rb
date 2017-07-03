@@ -54,7 +54,7 @@ module Mrkt
       status   = response[:result][0][:status]
 
       while status != "Completed"
-        sleep(300)
+        sleep(60)
         response = check_job_status(export_id)
         status   = response[:result][0][:status]
 
