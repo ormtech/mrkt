@@ -42,5 +42,92 @@ module Mrkt
 
       get("/rest/v1/activities.json", params)
     end
+
+    # Returns a CSV string of the activities
+    def get_bulk_activities(activity_type_ids, date_range: nil, fields: nil)
+      params = create_bulk_activities_params(activity_type_ids, date_range, fields)
+
+      response  = create_job(params)
+      export_id = response[:result][0][:exportId]
+
+      response = enqueue_job(export_id)
+      status   = response[:result][0][:status]
+
+      while status != "Completed"
+        sleep(300)
+        response = check_job_status(export_id)
+        status   = response[:result][0][:status]
+
+        if ["Cancelled", "Failed"].include? status
+          break
+        end
+      end
+
+      if status == "Completed"
+        file = Tempfile.new(export_id)
+
+        file.write(retrieve_data(export_id).force_encoding("utf-8"))
+
+        file.rewind
+
+        file
+      elsif status == "Failed"
+        raise Mkto::Error::BulkActivitiesJobFailed
+      elsif status == "Cancelled"
+        raise Mkto::Error::BulkActivitiesJobCancelled
+      end
+    end
+
+    private
+
+      def create_bulk_activities_params(activity_type_ids, date_range, fields)
+        params = {}
+
+        ids = if activity_type_ids.is_a? Array
+                activity_type_ids.join(",")
+              elsif activity_type_ids.is_a? String
+                activity_type_ids
+              else
+                raise ArgumentError.new("String or Array expected as first argument")
+              end
+        params[:activityTypeIds] = ids
+
+        params[:filter] = { createdAt: { startAt: date_range.begin, endAt: date_range.end } }
+
+        if fields
+          field_names = if fields.is_a? Array
+                          fields.join(",")
+                        elsif fields.is_a? String
+                          fields
+                        else
+                          raise ArgumentError.new("String or Array expected for field names")
+                        end
+          params[:fields] = field_names
+        end
+
+        params
+      end
+
+      def create_job(params)
+        post("/bulk/v1/activities/export/create.json") do |req|
+          json_payload(req, params)
+        end
+      end
+
+      def enqueue_job(export_id)
+        post("/bulk/v1/activities/export/#{export_id}/enqueue.json")
+      end
+
+      def check_job_status(export_id)
+        get("/bulk/v1/activities/export/#{export_id}/status.json")
+      end
+
+      def retrieve_data(export_id)
+        get("/bulk/v1/activities/export/#{export_id}/file.json")
+      end
+
+      def cancel_job(export_id)
+        post("/bulk/v1/activities/export/#{export_id}/cancel.json")
+      end
   end
 end
