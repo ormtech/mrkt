@@ -92,7 +92,9 @@ module Mrkt
               end
         params[:activityTypeIds] = ids
 
-        params[:filter] = { createdAt: { startAt: date_range.begin, endAt: date_range.end } }
+        start_at = date_range.begin.to_datetime.utc.iso8601
+        end_at   = date_range.end.to_datetime.utc.iso8601
+        params[:filter] = { createdAt: { startAt: start_at, endAt: end_at } }
 
         if fields
           field_names = if fields.is_a? Array
