@@ -78,58 +78,56 @@ module Mrkt
       end
     end
 
-    private
+    def create_bulk_activities_params(activity_type_ids, date_range, fields)
+      params = {}
 
-      def create_bulk_activities_params(activity_type_ids, date_range, fields)
-        params = {}
+      ids = if activity_type_ids.is_a? Array
+              activity_type_ids.join(",")
+            elsif activity_type_ids.is_a? String
+              activity_type_ids
+            else
+              raise ArgumentError.new("String or Array expected as first argument")
+            end
+      params[:activityTypeIds] = ids
 
-        ids = if activity_type_ids.is_a? Array
-                activity_type_ids.join(",")
-              elsif activity_type_ids.is_a? String
-                activity_type_ids
-              else
-                raise ArgumentError.new("String or Array expected as first argument")
-              end
-        params[:activityTypeIds] = ids
+      start_at = date_range.begin.to_datetime.utc.iso8601
+      end_at   = date_range.end.to_datetime.utc.iso8601
+      params[:filter] = { createdAt: { startAt: start_at, endAt: end_at } }
 
-        start_at = date_range.begin.to_datetime.utc.iso8601
-        end_at   = date_range.end.to_datetime.utc.iso8601
-        params[:filter] = { createdAt: { startAt: start_at, endAt: end_at } }
-
-        if fields
-          field_names = if fields.is_a? Array
-                          fields.join(",")
-                        elsif fields.is_a? String
-                          fields
-                        else
-                          raise ArgumentError.new("String or Array expected for field names")
-                        end
-          params[:fields] = field_names
-        end
-
-        params
+      if fields
+        field_names = if fields.is_a? Array
+                        fields.join(",")
+                      elsif fields.is_a? String
+                        fields
+                      else
+                        raise ArgumentError.new("String or Array expected for field names")
+                      end
+        params[:fields] = field_names
       end
 
-      def create_job(params)
-        post("/bulk/v1/activities/export/create.json") do |req|
-          json_payload(req, params)
-        end
-      end
+      params
+    end
 
-      def enqueue_job(export_id)
-        post("/bulk/v1/activities/export/#{export_id}/enqueue.json")
+    def create_job(params)
+      post("/bulk/v1/activities/export/create.json") do |req|
+        json_payload(req, params)
       end
+    end
 
-      def check_job_status(export_id)
-        get("/bulk/v1/activities/export/#{export_id}/status.json")
-      end
+    def enqueue_job(export_id)
+      post("/bulk/v1/activities/export/#{export_id}/enqueue.json")
+    end
 
-      def retrieve_data(export_id)
-        get("/bulk/v1/activities/export/#{export_id}/file.json")
-      end
+    def check_job_status(export_id)
+      get("/bulk/v1/activities/export/#{export_id}/status.json")
+    end
 
-      def cancel_job(export_id)
-        post("/bulk/v1/activities/export/#{export_id}/cancel.json")
-      end
+    def retrieve_data(export_id)
+      get("/bulk/v1/activities/export/#{export_id}/file.json")
+    end
+
+    def cancel_job(export_id)
+      post("/bulk/v1/activities/export/#{export_id}/cancel.json")
+    end
   end
 end
