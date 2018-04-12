@@ -31,7 +31,9 @@ module Mrkt
         client_secret: @client_secret
       }
 
-      params_to_authenticate[:partner_id] = @partner_id if !@partner_id.nil?
+      if !@partner_id.nil? && !@partner_id.empty?
+        params_to_authenticate[:partner_id] = @partner_id
+      end
 
       params_to_authenticate
     end

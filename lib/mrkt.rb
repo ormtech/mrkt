@@ -40,7 +40,7 @@ module Mrkt
 
       @client_id = options.fetch(:client_id)
       @client_secret = options.fetch(:client_secret)
-      @partner_id = options.fetch(:partner_id)
+      @partner_id = options.fetch(:partner_id, nil)
       @max_retries = options.fetch(:max_retries, 10)
       @connection = options.fetch(:connection, nil)
 
