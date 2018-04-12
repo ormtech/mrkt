@@ -25,12 +25,15 @@ module Mrkt
     end
 
     def authentication_params
-      {
+      params_to_authenticate = {
         grant_type: 'client_credentials',
         client_id: @client_id,
-        client_secret: @client_secret,
-        partner_id: @partner_id
+        client_secret: @client_secret
       }
+
+      params_to_authenticate[:partner_id] = @partner_id if !@partner_id.nil?
+
+      params_to_authenticate
     end
 
     def add_authorization(req)
