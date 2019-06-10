@@ -80,9 +80,9 @@ module Mrkt
 
         file
       elsif status == "Failed"
-        raise Mkto::Error::BulkActivitiesJobFailed
+        raise Mkto::Error::BulkLeadsJobFailed
       elsif status == "Cancelled"
-        raise Mkto::Error::BulkActivitiesJobCancelled
+        raise Mkto::Error::BulkLeadsJobCancelled
       end
     end
 
