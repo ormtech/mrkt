@@ -50,6 +50,86 @@ module Mrkt
       end
     end
 
+
+    # Returns a CSV string of the activities
+    def get_bulk_leads(updated_date_range: nil, fields: nil)
+      puts "Getting Bulk Leads!"
+      params = create_bulk_leads_params(updated_date_range, fields)
+
+      response  = create_lead_job(params)
+      export_id = response[:result][0][:exportId]
+
+      response = enqueue_lead_job(export_id)
+      status   = response[:result][0][:status]
+
+      while status != "Completed"
+        sleep(60)
+        response = check_lead_job_status(export_id)
+        status   = response[:result][0][:status]
+
+        if ["Cancelled", "Failed"].include? status
+          break
+        end
+      end
+
+      if status == "Completed"
+        file = Tempfile.new(export_id)
+
+        file.write(retrieve_lead_data(export_id).force_encoding("utf-8"))
+
+        file.rewind
+
+        file
+      elsif status == "Failed"
+        raise Mkto::Error::BulkActivitiesJobFailed
+      elsif status == "Cancelled"
+        raise Mkto::Error::BulkActivitiesJobCancelled
+      end
+    end
+
+    def create_bulk_leads_params(date_range, fields)
+      params = {}
+      puts "Creating Params!"
+      start_at = date_range.begin.to_datetime.utc.iso8601
+      end_at   = date_range.end.to_datetime.utc.iso8601
+      params[:filter] = { updatedAt: { startAt: start_at, endAt: end_at } }
+
+      if fields
+        field_names = if fields.is_a? Array
+                        fields.join(",")
+                      elsif fields.is_a? String
+                        fields
+                      else
+                        raise ArgumentError.new("String or Array expected for field names")
+                      end
+        params[:fields] = field_names
+      end
+
+      params
+    end
+
+    def create_lead_job(params)
+      post("/bulk/v1/leads/export/create.json") do |req|
+        json_payload(req, params)
+      end
+    end
+
+    def enqueue_lead_job(export_id)
+      post("/bulk/v1/leads/export/#{export_id}/enqueue.json")
+    end
+
+    def check_job_lead_status(export_id)
+      get("/bulk/v1/leads/export/#{export_id}/status.json")
+    end
+
+    def retrieve_lead_data(export_id)
+      get("/bulk/v1/leads/export/#{export_id}/file.json")
+    end
+
+    def cancel_lead_job(export_id)
+      post("/bulk/v1/leads/export/#{export_id}/cancel.json")
+    end
+
     def delete_leads(leads)
       delete('/rest/v1/leads.json') do |req|
         json_payload(req, input: map_lead_ids(leads))
