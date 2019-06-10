@@ -53,7 +53,6 @@ module Mrkt
 
     # Returns a CSV string of the activities
     def get_bulk_leads(updated_date_range: nil, fields: nil)
-      puts "Getting Bulk Leads!"
       params = create_bulk_leads_params(updated_date_range, fields)
 
       response  = create_lead_job(params)
@@ -89,7 +88,6 @@ module Mrkt
 
     def create_bulk_leads_params(date_range, fields)
       params = {}
-      puts "Creating Params!"
       start_at = date_range.begin.to_datetime.utc.iso8601
       end_at   = date_range.end.to_datetime.utc.iso8601
       params[:filter] = { updatedAt: { startAt: start_at, endAt: end_at } }
