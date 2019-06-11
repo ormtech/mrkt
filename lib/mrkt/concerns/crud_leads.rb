@@ -7,13 +7,13 @@ module Mrkt
     def get_leads(filter_type, filter_values, fields: nil, batch_size: nil, next_page_token: nil)
       params = {
         filterType: filter_type,
-        filterValues: filter_values.join(',')
+        filterValues: filter_values.join(",")
       }
       params[:fields] = fields if fields
       params[:batchSize] = batch_size if batch_size
       params[:nextPageToken] = next_page_token if next_page_token
 
-      get('/rest/v1/leads.json', params)
+      get("/rest/v1/leads.json", params)
     end
 
     def get_lead_changes(fields: nil, batch_size: nil, list_id: nil, next_page_token: nil)
@@ -24,7 +24,7 @@ module Mrkt
       params[:batch_size] if batch_size
       params[:list_id] if list_id
 
-      get('/rest/v1/activities/leadchanges.json', params)
+      get("/rest/v1/activities/leadchanges.json", params)
     end
 
     def get_leads_by_program(program_id, batch_size: nil, next_page_token: nil, fields: nil)
@@ -36,8 +36,8 @@ module Mrkt
       get("/rest/v1/leads/program/#{program_id}.json", params)
     end
 
-    def createupdate_leads(leads, action: 'createOrUpdate', lookup_field: nil, partition_name: nil, async_processing: nil)
-      post('/rest/v1/leads.json') do |req|
+    def createupdate_leads(leads, action: "createOrUpdate", lookup_field: nil, partition_name: nil, async_processing: nil)
+      post("/rest/v1/leads.json") do |req|
         params = {
           action: action,
           input: leads
@@ -50,10 +50,8 @@ module Mrkt
       end
     end
 
-
-    # Returns a CSV string of the activities
-    def get_bulk_leads(updated_date_range: nil, fields: nil)
-      params = create_bulk_leads_params(updated_date_range, fields)
+    def get_bulk_leads(date_range: nil, fields: nil)
+      params = create_bulk_leads_params(date_range, fields)
 
       response  = create_lead_job(params)
       export_id = response[:result][0][:exportId]
@@ -88,18 +86,24 @@ module Mrkt
 
     def create_bulk_leads_params(date_range, fields)
       params = {}
-      start_at = date_range.begin.to_datetime.utc.iso8601
-      end_at   = date_range.end.to_datetime.utc.iso8601
-      params[:filter] = { updatedAt: { startAt: start_at, endAt: end_at } }
+
+      params[:filter] = {
+        updatedAt: {
+          startAt: date_range.begin.to_datetime.utc.iso8601,
+          endAt:   date_range.end.to_datetime.utc.iso8601,
+        }
+      }
 
       if fields
-        field_names = if fields.is_a? Array
-                        fields.join(",")
-                      elsif fields.is_a? String
-                        fields
-                      else
-                        raise ArgumentError.new("String or Array expected for field names")
-                      end
+        field_names =
+          if fields.is_a?(Array)
+            fields
+          elsif fields.is_a?(String)
+            fields.split(",")
+          else
+            raise ArgumentError.new("String or Array expected for field names")
+          end
+
         params[:fields] = field_names
       end
 
@@ -116,7 +120,7 @@ module Mrkt
       post("/bulk/v1/leads/export/#{export_id}/enqueue.json")
     end
 
-    def check_job_lead_status(export_id)
+    def check_lead_job_status(export_id)
       get("/bulk/v1/leads/export/#{export_id}/status.json")
     end
 
@@ -129,7 +133,7 @@ module Mrkt
     end
 
     def delete_leads(leads)
-      delete('/rest/v1/leads.json') do |req|
+      delete("/rest/v1/leads.json") do |req|
         json_payload(req, input: map_lead_ids(leads))
       end
     end
