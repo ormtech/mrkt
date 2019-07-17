@@ -146,5 +146,9 @@ module Mrkt
         json_payload(req, {})
       end
     end
+
+    def get_lead_partitions
+      get("/rest/v1/leads/partitions.json")
+    end
   end
 end
