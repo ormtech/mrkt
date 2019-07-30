@@ -25,6 +25,7 @@ class Mrkt::Errors
     610  => 'RequestedResourceNotFound',
     611  => 'System',
     612  => 'InvalidContentType',
+    615  >= 'ConcurrentAccessLimitReached',
     702  => 'NoDataFound',
     703  => 'DisabledFeature',
     710  => 'ParentFolderNotFound',
